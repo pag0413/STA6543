@@ -2,7 +2,9 @@
 title: "Assignment_1"
 author: "Patti Geppert"
 date: "6/8/2021"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -169,8 +171,15 @@ hist(college$Books,breaks = 50, xlab = xlab,main = 'Cost of Books, bins=50')
 ```
 Continue to explore the data:
 ```{r}
-
+par(mfrow = c(2,2))
+plot(college$Private,college$PhD,xlab='Private School Y/N', ylab = 'Number of Faculty with PhD')
+plot(college$Private,college$Top10perc,xlab='Private School Y/N', ylab = 'Number Students for Top 10% of HS Class')
+plot(college$Private,college$Terminal,xlab='Private School Y/N', ylab = 'Number of Faculty with Terminal Degree')
+plot(college$Private,college$Top25perc,xlab='Private School Y/N', ylab = 'Number Students for Top 25% of HS Class')
 ```
+
+Private schools had slightly lower median values of faulty with a PhD or terminal degrees than publis schools, but slightly higher median for numbers of students that graduated in the Top 10% or 25% of their high school class.  
+
 
 9. This exercise involves the Auto data set studied in the lab. Make sure
 that the missing values have been removed from the data.
@@ -194,6 +203,149 @@ range(auto$horsepower)
 range(auto$weight)
 range(auto$acceleration)
 ```
+(c) What is the mean and standard deviation of each quantitative
+predictor?
+
+```{r}
+a <- mean(auto$mpg)
+b <- sd(auto$mpg)
+c <- mean(auto$displacement)
+e <- sd(auto$displacement)
+f <- mean(auto$horsepower)
+g <- sd(auto$horsepower)
+h <- mean(auto$weight)
+i <- sd(auto$weight)
+j <- mean(auto$acceleration)
+k <- sd(auto$acceleration)
+
+sprintf("Mean of mpg is %s, and standard deviation is %s", a, b)
+sprintf("Mean of displacement is %s, and standard deviation is %s", c,e)
+sprintf("Mean of horsepower is %s, and standard deviation is %s", f,g)
+sprintf("Mean of weight is %s, and standard deviation is %s", h,i)
+sprintf("Mean of acceleration is %s, and standard deviation is %s", j,k)
+```
+
+(d) Now remove the 10th through 85th observations. What is the
+range, mean, and standard deviation of each predictor in the
+subset of the data that remains?
+
+```{r}
+auto_small <- auto[-c(10:85),]
+summary(auto_small)
+```
+(e) Using the full data set, investigate the predictors graphically,
+using scatterplots or other tools of your choice. Create some plots
+highlighting the relationships among the predictors. Comment
+on your findings.
+
+```{r}
+pairs(~mpg+displacement+horsepower+weight+acceleration,auto)
+
+
+```
+From the pairwise scatter plots, you can see that the following predictors are positively correlated: mpg and acceleration, displacement and horsepower, displacement and weight, horsepower and weight.  There are negative correlations between the following predictors: mpg and displacement, mpg, and horsepower, mpg and weight, displacement and acceleration,horsepower and acceleration, weight and acceleration.
+
+```{r}
+par(mfrow = c(2,2))
+ylab = 'mpg'
+auto$cylinders <- as.factor(auto$cylinders)
+plot(auto$cylinders,auto$mpg, ylab = ylab, xlab = "Cylinders" )
+auto$year <- as.factor(auto$year)
+plot(auto$year,auto$mpg,ylab = ylab, xlab = "Year")
+auto$origin <- as.factor(auto$origin)
+plot(auto$origin,auto$mpg, ylab = ylab, xlab = "Country of Origin")
+
+```
+ACcording to the plots above, 4 cylinder engines have the highest mpg, more recent car models tend to have a higher mpg than older models, and the Country of origin =3 tends to have higher mpg than the other two countries of origin.
+
+(f) Suppose that we wish to predict gas mileage (mpg) on the basis
+of the other variables. Do your plots suggest that any of the
+other variables might be useful in predicting mpg? Justify your
+answer.
+
+The visualizations above suggest that the following variables correlate with mpg and therefore may be useful predictors of mpg in a predictive model:  displacement, horsepower, weight, country of origin, cylinders, and maybe model year. From the plots above, it appears that there is a correlation between model year and mpg, though it may not be a strong correlation.
 
 
 
+10. This exercise involves the Boston housing data set
+```{r}
+library(MASS)
+boston <- Boston
+?Boston
+```
+There are 506 row and 14 columns in this dataset.  The rows represent towns in Boston.  The columns represent:  crim = crime rate,zn = proportion of residential land zones for lots over 25,000 sq.ft., indus = proportion of non-residential business per acre, chas = Charles River Dummy variable (if the tract bounds the river =1, otherwise =0), nox = nitrogen oxides concentration (parts per 10 million),rm =  average number of rooms per dwelling, age = proportion of owner-occupied units built prior to 1940, dis = weighted mean of distances to five Boston employment centres, rad= index of accessibility to radial highways, tax = full-value proprty-tax rate per \$10,000, ptratio = pupil-teacher ratio, black = 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town, lstat = lower status of the population (percent), medv = median value of owner-occupied homes in \$1000s.  
+
+(b) Make some pairwise scatterplots of the predictors (columns) in
+this data set. Describe your findings
+```{r}
+pairs(~crim+tax+ptratio+black+medv+lstat, boston)
+```
+
+There is a negative correlation between lstat and medv (ie, lower status of the population and median value of owner occupied homes).  This is not a surprising relationship.  It would be expected that the lower status of the population would live in less expensive homes.  There is 
+
+
+(c) Are any of the predictors associated with per capita crime rate?
+If so, explain the relationship
+```{r}
+pairs(~crim+indus+nox+rm+age+dis+rad,boston)
+
+```
+It appears that crime rate is high in a specific industrialized areas were there are about 20  non residential businesses per acre.  Crime rate is low below 20 or above 20 non residential businesses per acre.  The crime rate is higher in areas with lower median values.  The crime rate is higher in towns that have a higher proportion of houses that were built before 1094.  Crime rate is high closer to the Boston five employment city centers and further away from access to radial highways. Crime rate is high in an area where the full-value property tax rate is $700 per $1000. Crime rate is high when the parent-teacher ratio is 20.
+
+(d) Do any of the suburbs of Boston appear to have particularly
+high crime rates? Tax rates? Pupil-teacher ratios? Comment on
+the range of each predictor
+
+```{r}
+pairs(~dis+crim+tax+ptratio, boston)
+```
+It doens't appear that the towns furthest from the Boston five employment areas have particularly high-crime rates, full property tax rates or parent-teacher ratios as compared to towns closer to Boston city center.
+
+(e) How many of the suburbs in this data set bound the Charles
+river
+
+```{r}
+summary(boston$chas)
+
+
+```
+
+There are 35 suburbs on the Charles River and 471 suburbs that are not one the Charles River.
+
+(f) What is the median pupil-teacher ratio among the towns in this
+data set
+
+```{r}
+median(boston$ptratio)
+```
+
+The median pupil-teacher ratio among the towns in this
+data set is 19.05.
+
+
+(g) Which suburb of Boston has lowest median value of owner occupied homes? What are the values of the other predictors
+for that suburb, and how do those values compare to the overall
+ranges for those predictors? Comment on your findings.
+
+```{r}
+boston[boston$medv == min(boston$medv),]
+
+```
+```{r}
+summary(boston)
+```
+
+There are two suburbs,399 and 406, with the lowest median housing value of $5000. Both suburbs are in the highest quartile for crime, minimum for proportion of residential land zoned for lots over 25,000 sq.ft, third quartile for proportion of non-retail business acres, no tracts of land on the Charles River, highest quartile for nitrogen oxide concentration, lowest quartile for average rooms per dwelling,maximum number of owner occupied dwellings built before 1940, lowest quartile for distance to Boston employment areas, maximum index of accessibility to radial highways, third quartile for full-value property-tax rate per $10000, third quartile for ptratio, maximum proportion of blacks, highest quartile for proportion of people in lower status of the population.
+
+According to these statistics, it appears that these towns are in urbanor industrial areas, predominately lower-class and black neighborhoods with predominately small-single or multi-family dwellings.
+
+```{r}
+boston[boston$rm>7,]
+
+```
+There are 64 suburbs were the average number of rooms in the dwelling are greater than 7
+
+```{r}
+boston[boston$rm>8,]
+```
+There are 13 suburbs were the average number of rooms in the dwelling are greater than 8.  These suburbs tend to be in less industrialized areas, with low crime rates, and have higher median housing values, but lower full-value propery tax rates (most likely because the house is larger)
