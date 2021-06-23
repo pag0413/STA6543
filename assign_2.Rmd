@@ -1,0 +1,252 @@
+---
+title: "Assign_2"
+author: "Patti Geppert"
+date: "6/14/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library (ISLR)
+```
+
+### Assignment 2- Chapter 3: 2, 9, 10, 12
+
+2. Carefully explain the differences between the KNN classifier and KNN
+regression methods.
+
+KNN classifier and KNN regression are closely related non-parametric methods.  The KNN classifier classifies a new value based on the values of surrounding neighbors.  The K value determines how many neighbors are used to determine the class. If K =3, the most prevelent class of the 3 nearest neighbors is the class of the new value.  
+
+For KNN regression, a prediction point (y) is determined by finding the averaging the y values associated with x values are in the neighborhood of the predictor value.  The size of the neighborhood is K.  That is, if K=3, the three y values for the three x values nearest to the predictor value are used to calculate the new predicition point.  Much like the KNN classifier, with KNN regression, low K values result in a more flexible curve while the higher values produce a smoother, less flexible curve.  For low dimension models, KNN regression with K >4 performs better than linear regression. However, KNN regression does not provide a good fit in high dimentional models.
+
+
+9. This question involves the use of multiple linear regression on the
+Auto data set.
+(a) Produce a scatterplot matrix which includes all of the variables
+in the data set
+
+```{r}
+auto <- ISLR::Auto
+pairs (auto)
+```
+
+
+(b) Compute the matrix of correlations between the variables using
+the function cor(). You will need to exclude the name variable, cor() which is qualitative.
+
+```{r}
+x = auto[1:8]
+cor(x)
+
+```
+
+
+(c) Use the lm() function to perform a multiple linear regression
+with mpg as the response and all other variables except name as
+the predictors. Use the summary() function to print the results.
+Comment on the output. For instance:
+i. Is there a relationship between the predictors and the response?
+
+
+```{r}
+
+mpg.lm <- lm(mpg~.-name,data = auto)
+summary(mpg.lm)
+```
+
+ii. Which predictors appear to have a statistically significant
+relationship to the response?
+
+The statistically significant predictor variables are: displacement, weight, year, origin
+
+
+iii. What does the coefficient for the year variable suggest?
+
+The coefficient for the year variable is 0.750773.  The coefficient suggests that for increase in year, average mpg increases by 0.750733.
+
+
+(d) Use the plot() function to produce diagnostic plots of the linear
+regression fit. Comment on any problems you see with the fit.
+Do the residual plots suggest any unusually large outliers? Does
+the leverage plot identify any observations with unusually high
+leverage?
+
+Based on the residuals vs. fitted plot, it appears that a model with a x^2 woould be a better fit.  There do not appear to be leverage points.  None of the points on the residuals vs. leverage plot fall above the dotted 0.5 line.  The points on the scale-location plot are not randomly distributed suggesting heteroscedacity.
+
+```{r}
+par(mfrow=c(2,2))
+plot(mpg.lm)
+
+```
+
+
+(e) Use the * and : symbols to fit linear regression models with
+interaction effects. Do any interactions appear to be statistically
+significant?
+
+```{r}
+mpg.lm2 <- lm(mpg ~weight*year*origin, data = auto)
+summary(mpg.lm2)
+```
+
+```{r}
+mpg.lm3 <- lm(mpg ~weight+year+weight:year+origin, data = auto)
+summary(mpg.lm3)
+```
+```{r}
+mpg.lm3 <- lm(mpg ~weight+year+weight:year+origin, data = auto)
+summary(mpg.lm3)
+```
+The significant predictor variables were weight, year, and origin.  When a linear model was fit to the predictor variables and all permutations of interactions, all the predictor variables and resulting interactions were significant.  In addition, the adjusted R2 for the full model with the significant predictor variables and resulting interactions was higher than with just some of the interactions.  The full model explains 84% of the variability in the data.
+
+
+(f) Try a few different transformations of the variables, such as
+log(X), √X, X2. Comment on your findings
+
+```{r}
+mpg.lm4 <-  lm(formula = mpg ~ poly(weight,2),data=auto)
+summary(mpg.lm4)
+```
+```{r}
+par(mfrow=c(2,2))
+plot(mpg.lm4)
+```
+
+```{r}
+mpg.lm5 <-  lm(formula = mpg ~ log(weight),data=auto)
+summary(mpg.lm5)
+```
+```{r}
+mpg.lm6 <- lm(formula = mpg ~ weight,data=auto)
+summary(mpg.lm6)
+```
+```{r}
+par(mfrow=c(2,2))
+plot(mpg.lm6)
+```
+
+```{r}
+mpg.lm7 <- lm(formula = mpg ~ I(weight^.5),data=auto)
+summary(mpg.lm7)
+```
+```{r}
+par(mfrow = c(2,2))
+plot(mpg.lm7)
+```
+Performing a log(x), sqrt(x), or X^2 transformation on weight improved the fit of the model.  Without transformation a model that included just weight as the predictor variable explained about 69% of the variability in mpg.  Performing a sqrt(x), log(x), and X^2 transformation on weight explained 71%, 71% and 72% of the variability in the model based on the R2 values.
+
+
+10. This question should be answered using the Carseats data set.
+(a) Fit a multiple regression model to predict Sales using Price,
+Urban, and US
+
+```{r}
+seats <- ISLR::Carseats
+str(seats)
+```
+
+```{r}
+seats.lm1 <- lm(Sales~Price+Urban+US, data = seats)
+summary(seats.lm1)
+```
+
+(b) Provide an interpretation of each coefficient in the model. Be
+careful—some of the variables in the model are qualitative!
+Price:  for each unit increase in price, there is a significant 0.05 unit decrease in sales.
+Urban: there is not a significant different in sales between stores in urban and rural locations.
+US:  there is a significant different in sales between stores that are in the US and stores that aren't in the US.   Stores that are in the US sell 1.2 units for every unit sold by a store not in the US.
+
+(c) Write out the model in equation form, being careful to handle
+the qualitative variables properly.
+
+sales = 13.043469 + price(-0.054459)+ USNo + USYes(1.200573)
+
+
+(e) On the basis of your response to the previous question, fit a
+smaller model that only uses the predictors for which there is
+evidence of association with the outcome
+```{r}
+seats.lm2 <- lm(Sales~Price+US, data = seats)
+summary(seats.lm2)
+```
+
+(f) How well do the models in (a) and (e) fit the data?
+
+The model in (e) fits the data slightly better than the model in (a).  The adjusted R2 is slightly higher for model (e) as compared to model (a), 0.2354 vs. 0.2335.
+
+(g) Using the model from (e), obtain 95 % confidence intervals for
+the coefficient(s)
+
+```{r}
+confint(seats.lm2)
+```
+
+(h) Is there evidence of outliers or high leverage observations in the
+model from (e)?
+
+```{r}
+par(mfrow=c(2,2))
+plot(seats.lm2)
+```
+
+There do not appear to be outliers or leverage points in this data. 
+
+
+
+12. This problem involves simple linear regression without an intercept.
+(a) Recall that the coefficient estimate βˆ for the linear regression of
+Y onto X without an intercept is given by (3.38). Under what
+circumstance is the coefficient estimate for the regression of X
+onto Y the same as the coefficient estimate for the regression of
+Y onto X?
+
+The coefficient estimate for the regression of X onto Y will be the same as the coefficient estimate for the regression of Y onto X in the sum of squares for x is the same as the sum of squares for y (i.e., sum(x^2) = sum(y^2)) 
+
+
+(b) Generate an example in R with n = 100 observations in which
+the coefficient estimate for the regression of X onto Y is different
+from the coefficient estimate for the regression of Y onto X.
+
+
+```{r}
+set.seed(3)
+x <- rnorm(100)
+y <- 6*x
+
+xy.lm = lm(y~x)
+yx.lm = lm(x~y)
+summary(xy.lm)
+summary(yx.lm)
+```
+
+
+
+
+
+(c) Generate an example in R with n = 100 observations in which
+the coefficient estimate for the regression of X onto Y is the
+same as the coefficient estimate for the regression of Y onto X.
+
+
+```{r}
+set.seed(3)
+x = rnorm(100)
+y <- sample(x, 100)
+
+sum(x^2)
+sum(y^2)
+
+
+```
+
+```{r}
+xy.lm <- lm(y~x)
+yx.lm <- lm(x~y)
+summary(xy.lm)
+summary(yx.lm)
+```
+
+
+
